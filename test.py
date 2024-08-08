@@ -15,5 +15,13 @@ def main():
     for test in tests:
         tester.validate(test)
 
+    tester = Tester("tests")
+    tests = ["test1", "test2"]
+    tester.register("test1", [lambda: 1+1, lambda: 2+3, lambda: 5+8])
+    tester.register("test2", [lambda: {"hello":"world"}, lambda: "hello", lambda: {"hello": [1, 2, 3]}])
+    tester.log()
+    tester.record()
+    tester.validate()
+
 if __name__ == "__main__":
     main()

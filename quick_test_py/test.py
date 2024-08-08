@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Any, Optional
 import json
 import os
 from loguru import logger
@@ -13,22 +13,37 @@ class Tester():
     def register(self, name: str, test_cases: List[callable]) -> None:
         self.tests[name] = test_cases
 
-    def log(self, name: str) -> None:
-        logger.info(f"Running {name}\n")
-        for i, testcase in enumerate(self.tests[name]):
-            logger.info(f"---------Result of testcase #{i}---------")
-            logger.info(f"\t{testcase()}")
+    def log(self, name: Optional[str]=None) -> None:
+        if name is not None:
+            tests = [name]
+        else:
+            tests = self.tests.keys()
+        for name in tests:
+            logger.info(f"Running {name}\n")
+            for i, testcase in enumerate(self.tests[name]):
+                logger.info(f"---------Result of testcase #{i}---------")
+                logger.info(f"\t{testcase()}")
 
-    def validate(self, name: str) -> None:
-        self._validate(name, [tc() for tc in self.tests[name]])
+    def validate(self, name: Optional[str]=None) -> None:
+        if name is not None:
+            tests = [name]
+        else:
+            tests = self.tests.keys()
+        for name in tests:
+            self._validate(name, [tc() for tc in self.tests[name]])
 
-    def record(self, name: str) -> None:
-        logger.info(f"---------Recording results of {name}---------")
-        self._record(name, [tc() for tc in self.tests[name]])
+    def record(self, name: Optional[str]=None) -> None:
+        if name is not None:
+            tests = [name]
+        else:
+            tests = self.tests.keys()
+        for name in tests:
+            logger.info(f"---------Recording results of {name}---------")
+            self._record(name, [tc() for tc in self.tests[name]])
 
     def _validate(self, name: str, out: List[Any]) -> None:
         logger.info(f"---------Validating {name}---------")
-        with open(os.path.join(self.path, name), 'r') as fin:
+        with open(os.path.join(self.path, f'{name}.json'), 'r') as fin:
             data = json.load(fin)
         passed = True
         for i, (out, ground_truth) in enumerate(zip(out, data)):
