@@ -65,7 +65,7 @@ class Tester():
         if passed is False:
             logger.warn(f"Some testcases failed for {name}")
         else:
-            logger.success(f"All testcases passed for {name}! Have a nice day.")
+            logger.success(f"All testcases passed for {name}!")
 
     def _record(self, name: str, out: List[Any]) -> None:
         with open(os.path.join(self.path, f'{name}.json'), 'w') as fout:
