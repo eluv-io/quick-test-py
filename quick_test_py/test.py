@@ -50,7 +50,7 @@ class Tester():
             try:
                 self._record(name, [tc() for tc in self.tests[name]])
             except Exception as e:
-                logger.error(f"Encountered error while retrieving output from {name}")
+                logger.error(f"Encountered error while retrieving output from {name}.")
                 raise e
 
     def _validate(self, name: str, out: List[Any]) -> None:
