@@ -21,8 +21,12 @@ class Tester():
         for name in tests:
             logger.info(f"Running {name}\n")
             for i, testcase in enumerate(self.tests[name]):
-                logger.info(f"---------Result of testcase #{i}---------")
-                logger.info(f"\t{testcase()}")
+                try:
+                    logger.info(f"---------Result of testcase #{i+1}---------")
+                    logger.info(f"\t{testcase()}")
+                except Exception as e:
+                    logger.error(f"Encountered error while running testcase #{i+1}")
+                    raise e
 
     def validate(self, name: Optional[str]=None) -> None:
         if name is not None:
@@ -30,7 +34,11 @@ class Tester():
         else:
             tests = self.tests.keys()
         for name in tests:
-            self._validate(name, [tc() for tc in self.tests[name]])
+            try:
+                self._validate(name, [tc() for tc in self.tests[name]])
+            except Exception as e:
+                logger.error(f"Encountered error while validating {name}")
+                raise e
 
     def record(self, name: Optional[str]=None) -> None:
         if name is not None:
@@ -39,7 +47,11 @@ class Tester():
             tests = self.tests.keys()
         for name in tests:
             logger.info(f"---------Recording results of {name}---------")
-            self._record(name, [tc() for tc in self.tests[name]])
+            try:
+                self._record(name, [tc() for tc in self.tests[name]])
+            except Exception as e:
+                logger.error(f"Encountered error while retrieving output from {name}")
+                raise e
 
     def _validate(self, name: str, out: List[Any]) -> None:
         logger.info(f"---------Validating {name}---------")
@@ -48,7 +60,7 @@ class Tester():
         passed = True
         for i, (out, ground_truth) in enumerate(zip(out, data)):
             if out != ground_truth:
-                logger.error(f"\tTestcase #{i} failed")
+                logger.error(f"\tTestcase #{i+1} failed")
                 passed = False
         if passed is False:
             logger.warn(f"Some testcases failed for {name}")
