@@ -63,7 +63,7 @@ class Tester():
                 logger.error(f"\tTestcase #{i+1} failed")
                 passed = False
         if passed is False:
-            logger.warn(f"Some testcases failed for {name}")
+            logger.warning(f"Some testcases failed for {name}")
         else:
             logger.success(f"All testcases passed for {name}!")
 
