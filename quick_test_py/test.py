@@ -33,13 +33,25 @@ class Tester():
             tests = [name]
         else:
             tests = self.tests.keys()
+        failed = []
+        successful = []
         for name in tests:
             try:
-                self._validate(name, [tc() for tc in self.tests[name]])
+                passed = self._validate(name, [tc() for tc in self.tests[name]])
             except Exception as e:
                 logger.error(f"Encountered error while validating {name}")
-                raise e
-
+                passed = False
+            if passed:
+                successful.append(name)
+            else:
+                failed.append(name)
+        if len(failed) == 0:
+            logger.success("All tests passed!")
+        else:
+            if len(successful) > 0:
+                logger.info(f"Tests passed: {successful}")
+            logger.error(f"Tests failed: {failed}")
+            
     def record(self, name: Optional[str]=None) -> None:
         if name is not None:
             tests = [name]
@@ -53,7 +65,7 @@ class Tester():
                 logger.error(f"Encountered error while retrieving output from {name}.")
                 raise e
 
-    def _validate(self, name: str, out: List[Any]) -> None:
+    def _validate(self, name: str, out: List[Any]) -> bool:
         logger.info(f"---------Validating {name}---------")
         with open(os.path.join(self.path, f'{name}.json'), 'r') as fin:
             data = json.load(fin)
@@ -66,6 +78,7 @@ class Tester():
             logger.warning(f"Some testcases failed for {name}")
         else:
             logger.success(f"All testcases passed for {name}!")
+        return passed
 
     def _record(self, name: str, out: List[Any]) -> None:
         with open(os.path.join(self.path, f'{name}.json'), 'w') as fout:
