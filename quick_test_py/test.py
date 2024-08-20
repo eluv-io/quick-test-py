@@ -74,6 +74,8 @@ class Tester():
             if out != ground_truth:
                 logger.error(f"\tTestcase #{i+1} failed")
                 passed = False
+                logger.error(f"\tExpected: {ground_truth}")
+                logger.error(f"\tGot: {out}")
         if passed is False:
             logger.warning(f"Some testcases failed for {name}")
         else:
