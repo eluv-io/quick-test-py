@@ -1,6 +1,7 @@
 from typing import List, Any, Optional, Callable
 import json
 import os
+import pickle as pkl
 from loguru import logger
 
 class Tester():
@@ -63,10 +64,10 @@ class Tester():
 
     def _validate(self, name: str, cases: List[Callable]) -> bool:
         logger.info(f"---------Validating {name}---------")
-        if not os.path.exists(os.path.join(self.path, f'{name}.json')):
+        if not os.path.exists(os.path.join(self.path, f'{name}.pkl')):
             raise FileNotFoundError(f"Recorded output for {name} not found. Please run Tester with record() method first.")
-        with open(os.path.join(self.path, f'{name}.json'), 'r') as fin:
-            data = json.load(fin)
+        with open(os.path.join(self.path, f'{name}.pkl'), 'rb') as fin:
+            data = pkl.load(fin)
         passed = True
         for i, (tc, ground_truth) in enumerate(zip(cases, data)):
             try:
@@ -88,5 +89,5 @@ class Tester():
         return passed
 
     def _record(self, name: str, out: List[Any]) -> None:
-        with open(os.path.join(self.path, f'{name}.json'), 'w') as fout:
-            json.dump(out, fout, indent=4)
+        with open(os.path.join(self.path, f'{name}.pkl'), 'wb') as fout:
+            pkl.dump(out, fout)
