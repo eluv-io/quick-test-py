@@ -1,4 +1,4 @@
-from typing import List, Any, Optional
+from typing import List, Any, Optional, Callable
 import json
 import os
 from loguru import logger
@@ -10,7 +10,7 @@ class Tester():
         if not os.path.exists(path):
             os.makedirs(path)
 
-    def register(self, name: str, test_cases: List[callable]) -> None:
+    def register(self, name: str, test_cases: List[Callable]) -> None:
         self.tests[name] = test_cases
 
     def log(self, name: Optional[str]=None) -> None:
@@ -25,8 +25,8 @@ class Tester():
                     logger.info(f"---------Result of testcase #{i+1}---------")
                     logger.info(f"\t{testcase()}")
                 except Exception as e:
-                    logger.error(f"Encountered error while running testcase #{i+1}")
-                    raise e
+                    logger.error(f"Encountered error while running testcase #{i+1}:\n {e}")
+                    continue
 
     def validate(self, name: Optional[str]=None) -> None:
         if name is not None:
@@ -36,11 +36,7 @@ class Tester():
         failed = []
         successful = []
         for name in tests:
-            try:
-                passed = self._validate(name, [tc() for tc in self.tests[name]])
-            except Exception as e:
-                logger.error(f"Encountered error while validating {name}")
-                passed = False
+            passed = self._validate(name, [tc for tc in self.tests[name]])
             if passed:
                 successful.append(name)
             else:
@@ -62,15 +58,22 @@ class Tester():
             try:
                 self._record(name, [tc() for tc in self.tests[name]])
             except Exception as e:
-                logger.error(f"Encountered error while retrieving output from {name}.")
+                logger.error(f"Encountered error while retrieving output from {name}")
                 raise e
 
-    def _validate(self, name: str, out: List[Any]) -> bool:
+    def _validate(self, name: str, cases: List[Callable]) -> bool:
         logger.info(f"---------Validating {name}---------")
         with open(os.path.join(self.path, f'{name}.json'), 'r') as fin:
             data = json.load(fin)
         passed = True
-        for i, (out, ground_truth) in enumerate(zip(out, data)):
+        for i, (tc, ground_truth) in enumerate(zip(cases, data)):
+            try:
+                out = tc()
+            except Exception as e:
+                logger.error(f"\tTestcase #{i+1} failed")
+                logger.error(f"\tEncountered error while running testcase #{i+1}:\n {e}")
+                passed = False
+                continue
             if out != ground_truth:
                 logger.error(f"\tTestcase #{i+1} failed")
                 passed = False
