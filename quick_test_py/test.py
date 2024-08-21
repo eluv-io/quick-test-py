@@ -1,8 +1,9 @@
 from typing import List, Any, Optional, Callable
-import json
 import os
 import pickle as pkl
 from loguru import logger
+
+from .utils import are_equal
 
 class Tester():
     def __init__(self, path: str):
@@ -77,7 +78,7 @@ class Tester():
                 logger.error(f"\tEncountered error while running testcase #{i+1}:\n {e}")
                 passed = False
                 continue
-            if out != ground_truth:
+            if not are_equal(out, ground_truth):
                 logger.error(f"\tTestcase #{i+1} failed")
                 passed = False
                 logger.error(f"\tExpected: {ground_truth}")
