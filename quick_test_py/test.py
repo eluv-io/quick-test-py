@@ -63,6 +63,8 @@ class Tester():
 
     def _validate(self, name: str, cases: List[Callable]) -> bool:
         logger.info(f"---------Validating {name}---------")
+        if not os.path.exists(os.path.join(self.path, f'{name}.json')):
+            raise FileNotFoundError(f"Recorded output for {name} not found. Please run Tester with record() method first.")
         with open(os.path.join(self.path, f'{name}.json'), 'r') as fin:
             data = json.load(fin)
         passed = True
