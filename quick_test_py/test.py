@@ -97,7 +97,7 @@ class Tester():
     def _record(self, name: str, out: List[Any]) -> None:
         try:
             with open(os.path.join(self.path, f'{name}.json'), 'w') as fout:
-                json.dump(out, fout)
+                json.dump(out, fout, indent=4)
         except TypeError:
             logger.warning(f"Can't save test ground truth as json, pickling instead.")
             os.remove(os.path.join(self.path, f'{name}.json'))
