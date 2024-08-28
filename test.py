@@ -3,6 +3,13 @@ Test file to test the tester
 """
 from quick_test_py import Tester
 
+class CustomClass():
+    def __init__(self):
+        self.a = 1
+        self.b = 2
+    def __eq__(self, value: object) -> bool:
+        return self.a == value.a and self.b == value.b
+
 def main():
     # Passing tests
     tester = Tester("tests")
@@ -35,6 +42,11 @@ def main():
     tester.register("test1", [lambda: 1+1, lambda: 1/0, lambda: 5+8]) # error in test case #2
     tester.register("test2", [lambda: {"hello":"world"}, lambda: "hello", lambda: {"hello": 1/0}]) # error in test case #3
     tester.log()
+    tester.validate()
+
+    tester = Tester("tests")
+    tester.register("pickle_test", [lambda: 1+1, lambda: CustomClass()]) # non json-able result in test case #2
+    tester.record()
     tester.validate()
 
 if __name__ == "__main__":

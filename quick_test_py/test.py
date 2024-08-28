@@ -1,6 +1,7 @@
 from typing import List, Any, Optional, Callable
 import os
 import pickle as pkl
+import json
 from loguru import logger
 
 from .utils import are_equal
@@ -65,10 +66,14 @@ class Tester():
 
     def _validate(self, name: str, cases: List[Callable]) -> bool:
         logger.info(f"---------Validating {name}---------")
-        if not os.path.exists(os.path.join(self.path, f'{name}.pkl')):
+        if os.path.exists(os.path.join(self.path, f'{name}.json')):
+            with open(os.path.join(self.path, f'{name}.json'), 'rb') as fin:
+                data = json.load(fin)
+        elif os.path.exists(os.path.join(self.path, f'{name}.pkl')):
+            with open(os.path.join(self.path, f'{name}.pkl'), 'rb') as fin:
+                data = pkl.load(fin)
+        else:
             raise FileNotFoundError(f"Recorded output for {name} not found. Please run Tester with record() method first.")
-        with open(os.path.join(self.path, f'{name}.pkl'), 'rb') as fin:
-            data = pkl.load(fin)
         passed = True
         for i, (tc, ground_truth) in enumerate(zip(cases, data)):
             try:
@@ -90,5 +95,11 @@ class Tester():
         return passed
 
     def _record(self, name: str, out: List[Any]) -> None:
-        with open(os.path.join(self.path, f'{name}.pkl'), 'wb') as fout:
-            pkl.dump(out, fout)
+        try:
+            with open(os.path.join(self.path, f'{name}.json'), 'w') as fout:
+                json.dump(out, fout)
+        except TypeError:
+            logger.warning(f"Can't save test ground truth as json, pickling instead.")
+            os.remove(os.path.join(self.path, f'{name}.json'))
+            with open(os.path.join(self.path, f'{name}.pkl'), 'wb') as fout:
+                pkl.dump(out, fout)
