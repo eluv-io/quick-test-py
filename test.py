@@ -49,5 +49,13 @@ def main():
     tester.record()
     tester.validate()
 
+    # Failing test with dictionary result
+    tester = Tester("tests")
+    tester.register("test1", [lambda: 1+1, lambda: 2+3, lambda: {"a": 1, "b": 2, "c": {"d": [1, 2, 3]}}])
+    tester.record()
+    tester = Tester("tests")
+    tester.register("test1", [lambda: 1, lambda: 2+3, lambda: {"a": 1, "b": 2, "c": {"d": [1, 2, 3, 4]}}])
+    tester.validate()
+
 if __name__ == "__main__":
     main()

@@ -2,6 +2,7 @@ from typing import List, Any, Optional, Callable
 import os
 import pickle as pkl
 import json
+import difflib
 from loguru import logger
 
 from .utils import are_equal
@@ -66,14 +67,17 @@ class Tester():
 
     def _validate(self, name: str, cases: List[Callable]) -> bool:
         logger.info(f"---------Validating {name}---------")
+        jsonable = True
         if os.path.exists(os.path.join(self.path, f'{name}.json')):
             with open(os.path.join(self.path, f'{name}.json'), 'rb') as fin:
                 data = json.load(fin)
         elif os.path.exists(os.path.join(self.path, f'{name}.pkl')):
+            jsonable = False
             with open(os.path.join(self.path, f'{name}.pkl'), 'rb') as fin:
                 data = pkl.load(fin)
         else:
             raise FileNotFoundError(f"Recorded output for {name} not found. Please run Tester with record() method first.")
+        differ = difflib.Differ()
         passed = True
         for i, (tc, ground_truth) in enumerate(zip(cases, data)):
             try:
@@ -84,10 +88,11 @@ class Tester():
                 passed = False
                 continue
             if not are_equal(out, ground_truth):
-                logger.error(f"\tTestcase #{i+1} failed")
+                logger.error(f"\tTestcase #{i+1} failed: Results do not match")
                 passed = False
-                logger.error(f"\tExpected: {ground_truth}")
-                logger.error(f"\tGot: {out}")
+                if jsonable:
+                    diff = differ.compare(json.dumps(ground_truth, indent=2).splitlines(), json.dumps(out, indent=2).splitlines())
+                    logger.error('\n' + f'\n'.join(diff))
         if passed is False:
             logger.warning(f"Some testcases failed for {name}")
         else:
