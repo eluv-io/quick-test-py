@@ -4,6 +4,7 @@ import pickle as pkl
 import json
 import difflib
 from loguru import logger
+import traceback
 
 from .utils import are_equal
 
@@ -29,6 +30,7 @@ class Tester():
                     logger.info(f"---------Result of testcase #{i+1}---------")
                     logger.info(f"\t{testcase()}")
                 except Exception as e:
+                    logger.error(traceback.format_exc())
                     logger.error(f"Encountered error while running testcase #{i+1}:\n {e}")
                     continue
 
@@ -84,6 +86,7 @@ class Tester():
                 out = tc()
             except Exception as e:
                 logger.error(f"\tTestcase #{i+1} failed")
+                logger.error(traceback.format_exc())
                 logger.error(f"\tEncountered error while running testcase #{i+1}:\n {e}")
                 passed = False
                 continue
