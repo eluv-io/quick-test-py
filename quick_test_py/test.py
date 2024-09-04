@@ -18,10 +18,8 @@ class Tester():
     def register(self, name: str, test_cases: List[Callable]) -> None:
         self.tests[name] = test_cases
 
-    def log(self, name: Optional[str]=None) -> None:
-        if name is not None:
-            tests = [name]
-        else:
+    def log(self, tests: Optional[List[str]]=None) -> None:
+        if tests is None:
             tests = self.tests.keys()
         for name in tests:
             logger.info(f"Running {name}\n")
@@ -34,10 +32,8 @@ class Tester():
                     logger.error(f"Encountered error while running testcase #{i+1}:\n {e}")
                     continue
 
-    def validate(self, name: Optional[str]=None) -> None:
-        if name is not None:
-            tests = [name]
-        else:
+    def validate(self, tests: Optional[List[str]]=None) -> None:
+        if tests is None:
             tests = self.tests.keys()
         failed = []
         successful = []
@@ -54,10 +50,8 @@ class Tester():
                 logger.info(f"Tests passed: {successful}")
             logger.error(f"Tests failed: {failed}")
             
-    def record(self, name: Optional[str]=None) -> None:
-        if name is not None:
-            tests = [name]
-        else:
+    def record(self, tests: Optional[List[str]]=None) -> None:
+        if tests is None:
             tests = self.tests.keys()
         for name in tests:
             logger.info(f"---------Recording results of {name}---------")
