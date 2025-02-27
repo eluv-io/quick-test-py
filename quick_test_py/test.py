@@ -15,15 +15,20 @@ class Tester():
         if not os.path.exists(path):
             os.makedirs(path)
 
-    def register(self, name: str, test_cases: List[Callable]) -> None:
-        self.tests[name] = test_cases
+    def register(self, test: Callable) -> None:
+        """Takes a function that returns a list of testcases and registers it with the Tester object.
+        
+        Args:
+            test (Callable): A function that returns a list of testcases which are functions returning test outputs. 
+        """
+        self.tests[test.__name__] = test
 
     def log(self, tests: Optional[List[str]]=None) -> None:
         if tests is None:
-            tests = self.tests.keys()
+            tests = list(self.tests.keys())
         for name in tests:
             logger.info(f"Running {name}\n")
-            for i, testcase in enumerate(self.tests[name]):
+            for i, testcase in enumerate(self.tests[name]()):
                 try:
                     logger.info(f"---------Result of testcase #{i+1}---------")
                     logger.info(f"\t{testcase()}")
@@ -34,11 +39,11 @@ class Tester():
 
     def validate(self, tests: Optional[List[str]]=None) -> None:
         if tests is None:
-            tests = self.tests.keys()
+            tests = list(self.tests.keys())
         failed = []
         successful = []
         for name in tests:
-            passed = self._validate(name, [tc for tc in self.tests[name]])
+            passed = self._validate(name, self.tests[name]())
             if passed:
                 successful.append(name)
             else:
@@ -52,11 +57,11 @@ class Tester():
             
     def record(self, tests: Optional[List[str]]=None) -> None:
         if tests is None:
-            tests = self.tests.keys()
+            tests = list(self.tests.keys())
         for name in tests:
             logger.info(f"---------Recording results of {name}---------")
             try:
-                self._record(name, [tc() for tc in self.tests[name]])
+                self._record(name, [tc() for tc in self.tests[name]()])
             except Exception as e:
                 logger.error(f"Encountered error while retrieving output from {name}")
                 raise e
